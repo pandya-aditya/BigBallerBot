@@ -1,37 +1,40 @@
 import os
 import discord
-import random
-import asyncio
 from discord.ext import commands
 
-client = discord.Client()
+client = commands.Bot(command_prefix = "$")
 
 @client.event
 async def on_ready():
-  print("We have logged in as {0.user}".format(client))
+    print("The Bot is now ready.")
+    print("_____________________")
 
-@client.event
-async def on_message(message):
-  if message.author == client.user:
-    return
+################################## Hello command
 
-  if message.content.startswith("$hello"):
-    await message.channel.send("Hello!")
+@client.command()
+async def hello(ctx):
+    await ctx.send("Hello!")
 
-  if message.content.startswith('$guess the number'):
-        guess = random.randint(0, 100)
-        await message.channel.send("Okay! Let's play Guess the Number! Pick a Number from 1 to 100! If the guess is right, react with a thumbs up! If it is higher, react with the up arrow, and if it is lower, react with the down arrow!")
-        def guess_right(reaction, user):
-            return user == message.author and str(reaction.emoji) == '👍'
-        while True:
-          await message.channel.send("Is your number " + str(guess) + "?")
+################################## Play and Pause Music
 
-          try:
-            reaction, user = await client.wait_for('reaction_add', timeout=60.0, check=guess_right)
-          except asyncio.TimeoutError:
-            await channel.send('👎')
-          else:
-            await channel.send('👍')
+@client.command(pass_context = True)
+async def play(ctx):
+    if(ctx.author.voice):
+        channel = ctx.message.author.voice.channel
+        await channel.connect()
+    else:
+        ctx.send("You must be in a voice channel to complete this command")
 
 
-client.run(os.environ['Token'])
+@client.command(pass_context = True)
+async def leave(ctx):
+    if (ctx.voice_client):
+        await ctx.guild.voice_client.disconnect()
+        await ctx.send("I left the voice channel")
+    
+    else:
+        await ctx.send("I am not in a voice channel")
+
+################################## Client Run
+
+client.run(client.run("OTMzMDgzMDI5MTU5NjczOTA2.YecXSQ.sJCcA7p30Z3Dpp5qvuOY8u0-7DA"))
